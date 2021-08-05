@@ -1,0 +1,19 @@
+### STAR   --runMode genomeGenerate   --runThreadN 6   --genomeDir Set2/   --genomeFastaFiles ./Primer_Set2_2020Sep_Ref.fasta      --genomeSAindexNbases 4   --sjdbGTFfile ./Set2_custom.gtf
+### GstrandBit 32
+versionGenome	2.7.4a
+genomeType	Full
+genomeFastaFiles	./Primer_Set2_2020Sep_Ref.fasta 
+genomeSAindexNbases	4
+genomeChrBinNbits	18
+genomeSAsparseD	1
+genomeTransformType	None
+genomeTransformVCF	-
+sjdbOverhang	100
+sjdbFileChrStartEnd	- 
+sjdbGTFfile	./Set2_custom.gtf
+sjdbGTFchrPrefix	-
+sjdbGTFfeatureExon	exon
+sjdbGTFtagExonParentTranscript	transcript_id
+sjdbGTFtagExonParentGene	gene_id
+sjdbInsertSave	Basic
+genomeFileSizes	4194304 20447

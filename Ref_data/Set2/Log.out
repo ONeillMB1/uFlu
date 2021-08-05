@@ -1,0 +1,103 @@
+STAR version=2.7.6a
+STAR compilation time,server,dir=Mon Nov 16 09:41:33 UTC 2020 7fbcc7b58540:/opt/gensoft/src/STAR/STAR-2.7.6a/source
+##### Command Line:
+STAR --runMode genomeGenerate --runThreadN 6 --genomeDir Set2/ --genomeFastaFiles ./Primer_Set2_2020Sep_Ref.fasta --genomeSAindexNbases 4 --sjdbGTFfile ./Set2_custom.gtf
+##### Initial USER parameters from Command Line:
+###### All USER parameters from Command Line:
+runMode                       genomeGenerate     ~RE-DEFINED
+runThreadN                    6     ~RE-DEFINED
+genomeDir                     Set2/     ~RE-DEFINED
+genomeFastaFiles              ./Primer_Set2_2020Sep_Ref.fasta        ~RE-DEFINED
+genomeSAindexNbases           4     ~RE-DEFINED
+sjdbGTFfile                   ./Set2_custom.gtf     ~RE-DEFINED
+##### Finished reading parameters from all sources
+
+##### Final user re-defined parameters-----------------:
+runMode                           genomeGenerate
+runThreadN                        6
+genomeDir                         Set2/
+genomeFastaFiles                  ./Primer_Set2_2020Sep_Ref.fasta   
+genomeSAindexNbases               4
+sjdbGTFfile                       ./Set2_custom.gtf
+
+-------------------------------
+##### Final effective command line:
+STAR   --runMode genomeGenerate   --runThreadN 6   --genomeDir Set2/   --genomeFastaFiles ./Primer_Set2_2020Sep_Ref.fasta      --genomeSAindexNbases 4   --sjdbGTFfile ./Set2_custom.gtf
+----------------------------------------
+
+Number of fastq files for each mate = 1
+Finished loading and checking parameters
+--genomeDir directory exists and will be overwritten: Set2/
+Mar 08 11:54:14 ... starting to generate Genome files
+./Primer_Set2_2020Sep_Ref.fasta : chr # 0  "H1N1_PB2" chrStart: 0
+./Primer_Set2_2020Sep_Ref.fasta : chr # 1  "H3N2_PB2" chrStart: 262144
+./Primer_Set2_2020Sep_Ref.fasta : chr # 2  "H1N1_PB1" chrStart: 524288
+./Primer_Set2_2020Sep_Ref.fasta : chr # 3  "H3N2_PB1" chrStart: 786432
+./Primer_Set2_2020Sep_Ref.fasta : chr # 4  "H3N2_PA" chrStart: 1048576
+./Primer_Set2_2020Sep_Ref.fasta : chr # 5  "H1N1_PA" chrStart: 1310720
+./Primer_Set2_2020Sep_Ref.fasta : chr # 6  "H3N2_NP" chrStart: 1572864
+./Primer_Set2_2020Sep_Ref.fasta : chr # 7  "H1N1_NP" chrStart: 1835008
+./Primer_Set2_2020Sep_Ref.fasta : chr # 8  "H3N2_M" chrStart: 2097152
+./Primer_Set2_2020Sep_Ref.fasta : chr # 9  "H1N1_M" chrStart: 2359296
+./Primer_Set2_2020Sep_Ref.fasta : chr # 10  "H1N1_HA" chrStart: 2621440
+./Primer_Set2_2020Sep_Ref.fasta : chr # 11  "H3N2_HA" chrStart: 2883584
+./Primer_Set2_2020Sep_Ref.fasta : chr # 12  "H3N2_NA" chrStart: 3145728
+./Primer_Set2_2020Sep_Ref.fasta : chr # 13  "H1N1_NA" chrStart: 3407872
+./Primer_Set2_2020Sep_Ref.fasta : chr # 14  "H3N2_NS" chrStart: 3670016
+./Primer_Set2_2020Sep_Ref.fasta : chr # 15  "H1N1_NS" chrStart: 3932160
+Chromosome sequence lengths: 
+H1N1_PB2	157
+H3N2_PB2	102
+H1N1_PB1	160
+H3N2_PB1	160
+H3N2_PA	182
+H1N1_PA	182
+H3N2_NP	277
+H1N1_NP	277
+H3N2_M	109
+H1N1_M	93
+H1N1_HA	137
+H3N2_HA	142
+H3N2_NA	132
+H1N1_NA	132
+H3N2_NS	118
+H1N1_NS	118
+Genome sequence total length = 2478
+Genome size with padding = 4194304
+Mar 08 11:54:14 ..... processing annotations GTF
+Processing pGe.sjdbGTFfile=./Set2_custom.gtf, found:
+		16 transcripts
+		16 exons (non-collapsed)
+		0 collapsed junctions
+Total junctions: 0
+Mar 08 11:54:14 ..... finished GTF processing
+
+Estimated genome size with padding and SJs: total=genome+SJ=205194304 = 4194304 + 201000000
+GstrandBit=32
+Number of SA indices: 4956
+Mar 08 11:54:14 ... starting to sort Suffix Array. This may take a long time...
+Number of chunks: 6;   chunks size limit: 7928 bytes
+Mar 08 11:54:14 ... sorting Suffix Array chunks and saving them to disk...
+Writing 7904 bytes into Set2//SA_0 ; empty space on disk = 10916348297216 bytes ... done
+Writing 336 bytes into Set2//SA_5 ; empty space on disk = 10916348297216 bytes ... done
+Writing 7840 bytes into Set2//SA_4 ; empty space on disk = 10916348297216 bytes ... done
+Writing 7848 bytes into Set2//SA_2 ; empty space on disk = 10916348297216 bytes ... done
+Writing 7856 bytes into Set2//SA_1 ; empty space on disk = 10916348297216 bytes ... done
+Writing 7864 bytes into Set2//SA_3 ; empty space on disk = 10916348297216 bytes ... done
+Mar 08 11:54:14 ... loading chunks from disk, packing SA...
+Mar 08 11:54:14 ... finished generating suffix array
+Mar 08 11:54:14 ... generating Suffix Array index
+Mar 08 11:54:14 ... completed Suffix Array index
+Mar 08 11:54:14   Finished preparing junctions
+Mar 08 11:54:14 ..... finished inserting junctions into genome
+Mar 08 11:54:14 ... writing Genome to disk ...
+Writing 4194304 bytes into Set2//Genome ; empty space on disk = 10916352491520 bytes ... done
+SA size in bytes: 20447
+Mar 08 11:54:14 ... writing Suffix Array to disk ...
+Writing 20447 bytes into Set2//SA ; empty space on disk = 10916348297216 bytes ... done
+Mar 08 11:54:14 ... writing SAindex to disk
+Writing 8 bytes into Set2//SAindex ; empty space on disk = 10916348297216 bytes ... done
+Writing 40 bytes into Set2//SAindex ; empty space on disk = 10916348297216 bytes ... done
+Writing 1491 bytes into Set2//SAindex ; empty space on disk = 10916348297216 bytes ... done
+Mar 08 11:54:14 ..... finished successfully
+DONE: Genome generation, EXITING
