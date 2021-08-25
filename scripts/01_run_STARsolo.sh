@@ -1,5 +1,12 @@
 #!/bin/bash
-#sbatch --array=1-12 --ntasks=32 --mem=60000 -J solo -o "01_run_STARsolo_%a.log" 01_run_STARsolo.sh
+
+#SBATCH --mem=60000
+#SBATCH -J solo
+#SBATCH -o logfile_STARsolo_%A_%a.txt
+#SBATCH -e logfile_STARsolo_%A_%a.txt
+#SBATCH --array=1-12 
+#SBATCH --partition=geh
+#SBATCH --qos=geh
 
 ##########################################################################################################
 ##########################################################################################################

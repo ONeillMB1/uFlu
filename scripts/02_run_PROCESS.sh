@@ -1,5 +1,12 @@
 #!/bin/bash
-#sbatch --array=1-12 --qos=geh -p geh --mem 100000 -J uFlu -o "logfile_custom_analyses_%a.log" 02_run_PROCESS.sh
+
+#SBATCH --mem=100000
+#SBATCH -J uFlu
+#SBATCH -o logfile_customAnalyses_%A_%a.txt
+#SBATCH -e logfile_customAnalyses_%A_%a.txt
+#SBATCH --array=1-12 
+#SBATCH --partition=geh
+#SBATCH --qos=geh
 
 PROJECT="NGS11"
 TASKDIR="/pasteur/zeus/projets/p01/uFlu/reassortment_project"
