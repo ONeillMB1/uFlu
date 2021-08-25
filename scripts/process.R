@@ -16,13 +16,13 @@ library(SoupX)
 library(cowplot)
 library(uwot)
 
-PROJECT="NGS11"
 ALIGNDIR="/pasteur/zeus/projets/p01/uFlu/reassortment_project/02_STARsolo_outputs"
 TASKDIR="/pasteur/zeus/projets/p01/uFlu/reassortment_project/03_custom_analyses"
 REFDIR="/pasteur/zeus/projets/p01/uFlu/reassortment_project/resources/Ref_data"
 
 args <- commandArgs(TRUE)
 SAMPLE=args[1]
+PROJECT=args[2]
 
 set.seed(1000)
 

@@ -4,7 +4,7 @@
 #SBATCH -J solo
 #SBATCH -o logfile_STARsolo_%A_%a.txt
 #SBATCH -e logfile_STARsolo_%A_%a.txt
-#SBATCH --array=1-12 
+#SBATCH --array=1-<UPDATE TO NUMBER OF SAMPLES> 
 
 ##########################################################################################################
 ##########################################################################################################
@@ -22,7 +22,7 @@
 
 SAMPLE_NUM=${SLURM_ARRAY_TASK_ID} 
 
-PROJECT="NGS11" #modify for new sequencing run
+PROJECT="<CHANGE ME>"
 FASTQPATH="/pasteur/zeus/projets/p01/uFlu/reassortment_project/01_raw_seq_data/NGS11/Novaseq_150621/fastq" #modify for new sequencing run
 REFPATH="/pasteur/zeus/projets/p01/uFlu/reassortment_project/resources/Ref_data"
 TASKDIR="/pasteur/zeus/projets/p01/uFlu/reassortment_project/02_STARsolo_outputs"
@@ -66,11 +66,16 @@ start=`date +%s`
 
 STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}.Solo.out/Gene/raw/ \
 	${TASKDIR}/${PROJECT}/${ID}.Solo.out/emptyDrops_50counts/ \
-	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 50 0.01 20000 0.01 10000
+	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 50 0.01 20000 0.01 10000 \
+	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}_filter_n50. \
 
 STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}.Solo.out/Gene/raw/ \
 	${TASKDIR}/${PROJECT}/${ID}.Solo.out/emptyDrops_75counts/ \
-	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 75 0.01 20000 0.01 10000
+	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 75 0.01 20000 0.01 10000 \
+	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}_filter_n75. \
+
+
+chmod 775 ${TASKDIR}/${PROJECT}/${ID}* 
 
 end=`date +%s`
 runtime=$((end-start))
