@@ -5,8 +5,6 @@
 #SBATCH -o logfile_STARsolo_%A_%a.txt
 #SBATCH -e logfile_STARsolo_%A_%a.txt
 #SBATCH --array=1-12 
-#SBATCH --partition=geh
-#SBATCH --qos=geh
 
 ##########################################################################################################
 ##########################################################################################################
@@ -41,7 +39,7 @@ module load STAR/2.7.8a
 start=`date +%s`
 hostname
 
-STAR --genomeDir ${REFPATH}/Set2/ \ #modify if using a different reference
+STAR --genomeDir ${REFPATH}/Set2/ \
 	--readFilesCommand zcat \
 	--readFilesIn ${FASTQPATH}/${ID}_R2_001.fastq.gz ${FASTQPATH}/${ID}_R1_001.fastq.gz \
 	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}. \
