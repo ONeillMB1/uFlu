@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #SBATCH --mem=60000
+#SBATCH --ntasks=12
 #SBATCH -J solo
 #SBATCH -o logfile_STARsolo_%A_%a.txt
 #SBATCH -e logfile_STARsolo_%A_%a.txt
@@ -42,8 +43,8 @@ hostname
 STAR --genomeDir ${REFPATH}/Set2/ \
 	--readFilesCommand zcat \
 	--readFilesIn ${FASTQPATH}/${ID}_R2_001.fastq.gz ${FASTQPATH}/${ID}_R1_001.fastq.gz \
-	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}. \
-	--runThreadN 32 \
+	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}/${ID}. \
+	--runThreadN 12 \
 	--soloType CB_UMI_Complex \
 	--soloCBposition 0_0_0_15 0_20_0_35 0_40_0_55 0_60_0_75 \
 	--soloUMIposition 0_94_0_103 \
@@ -64,18 +65,21 @@ echo $runtime
 
 start=`date +%s`
 
-STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}.Solo.out/Gene/raw/ \
+STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw/ \
 	${TASKDIR}/${PROJECT}/${ID}.Solo.out/emptyDrops_50counts/ \
 	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 50 0.01 20000 0.01 10000 \
-	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}_filter_n50. \
+	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}/${ID}_soloCellFiltering_n50counts. \
 
-STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}.Solo.out/Gene/raw/ \
+STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw/ \
 	${TASKDIR}/${PROJECT}/${ID}.Solo.out/emptyDrops_75counts/ \
 	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 75 0.01 20000 0.01 10000 \
-	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}_filter_n75. \
+	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}/${ID}_soloCellFiltering_n75counts. \
 
+mv ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw/features.tsv ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw/genes.tsv
+mv ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/emptyDrops_50counts/features.tsv ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/emptyDrops_50counts/genes.tsv
+mv ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/emptyDrops_75counts/features.tsv ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/emptyDrops_75counts/genes.tsv
 
-chmod 775 ${TASKDIR}/${PROJECT}/${ID}* 
+chmod -R 775 ${TASKDIR}/${PROJECT}/${ID} 
 
 end=`date +%s`
 runtime=$((end-start))
