@@ -65,13 +65,13 @@ echo $runtime
 
 start=`date +%s`
 
-STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw/ \
-	${TASKDIR}/${PROJECT}/${ID}.Solo.out/emptyDrops_50counts/ \
+STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw \
+	${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/emptyDrops_50counts/ \
 	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 50 0.01 20000 0.01 10000 \
 	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}/${ID}_soloCellFiltering_n50counts. \
 
-STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw/ \
-	${TASKDIR}/${PROJECT}/${ID}.Solo.out/emptyDrops_75counts/ \
+STAR --runMode soloCellFiltering ${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/raw \
+	${TASKDIR}/${PROJECT}/${ID}/${ID}.Solo.out/Gene/emptyDrops_75counts/ \
 	--soloCellFilter EmptyDrops_CR ${cells} 0.99 10 45000 90000 75 0.01 20000 0.01 10000 \
 	--outFileNamePrefix ${TASKDIR}/${PROJECT}/${ID}/${ID}_soloCellFiltering_n75counts. \
 
