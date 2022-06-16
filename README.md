@@ -12,4 +12,4 @@ data.table,
 DropletUtils,
 SoupX,
 cowplot,
-uwot,
+uwot
