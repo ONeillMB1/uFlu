@@ -320,10 +320,9 @@ return_DF <- function(meta, pvalsList, cont, th, umi) {
                                ifelse(newmeta$H3N2_segs_fdr < 5 & newmeta$H1N1_segs_fdr < 5, "INDISTINGUISHABLE",
                                       ifelse(newmeta$H1N1_segs_fdr > newmeta$H3N2_segs_fdr, "H1N1", "H3N2")))
   
-  #newmeta$droplet2 <- ifelse(newmeta$droplet=="REASSORTMENT", paste(newmeta$droplet, newmeta$background, sep="_"), newmeta$droplet)
-  newmeta$droplet2 <- paste(newmeta$droplet, newmeta$background, sep="_")
-  #ATTENTION: note that droplet definition is modified in part2!!!!!!!!!
-  
+  #ATTENTION: note that droplet2 was dropped from previous developments!
+              
+		      
   return(newmeta)
   
 }
