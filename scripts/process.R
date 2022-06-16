@@ -124,7 +124,7 @@ merge_cnts_with_meta <- function(sce) {
 
 df50 <- merge_cnts_with_meta(eD50)
 
-#Modify the function to return the pvalues rather than TRUE/FALSE
+#Modify the SoupX function to return the pvalues rather than TRUE/FALSE
 estimateNonExpressingCellsMod <- function (sc, nonExpressedGeneList, clusters = NULL, maximumContamination = 1,
                                            pCut = 0.05)
 { 
