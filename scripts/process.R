@@ -1,7 +1,7 @@
 .libPaths("/pasteur/zeus/projets/p01/uFlu/reassortment_project/resources/R_libs/4.1.0")
 
 ##########################################################################################################
-##### This script has been written by Mary O'Neill in August 2021 for the uFlu project.
+##### This script has been developed by Mary O'Neill in 2021-2022 for the uFlu project.
 ##### It should be executed by a shell script for each sample.
 ##########################################################################################################
 
@@ -322,7 +322,7 @@ return_DF <- function(meta, pvalsList, cont, th, umi) {
   
   #newmeta$droplet2 <- ifelse(newmeta$droplet=="REASSORTMENT", paste(newmeta$droplet, newmeta$background, sep="_"), newmeta$droplet)
   newmeta$droplet2 <- paste(newmeta$droplet, newmeta$background, sep="_")
-  
+  #ATTENTION: note that droplet definition is modified in part2!!!!!!!!!
   
   return(newmeta)
   
