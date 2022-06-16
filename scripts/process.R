@@ -1,7 +1,7 @@
 .libPaths("/pasteur/zeus/projets/p01/uFlu/reassortment_project/resources/R_libs/4.1.0")
 
 ##########################################################################################################
-##### This script has been written by Mary O'Neill in August 2021 for the uFlu project.
+##### This script has been developed by Mary O'Neill in 2021-2022 for the uFlu project.
 ##### It should be executed by a shell script for each sample.
 ##########################################################################################################
 
@@ -124,7 +124,7 @@ merge_cnts_with_meta <- function(sce) {
 
 df50 <- merge_cnts_with_meta(eD50)
 
-#Modify the function to return the pvalues rather than TRUE/FALSE
+#Modify the SoupX function to return the pvalues rather than TRUE/FALSE
 estimateNonExpressingCellsMod <- function (sc, nonExpressedGeneList, clusters = NULL, maximumContamination = 1,
                                            pCut = 0.05)
 { 
@@ -320,10 +320,9 @@ return_DF <- function(meta, pvalsList, cont, th, umi) {
                                ifelse(newmeta$H3N2_segs_fdr < 5 & newmeta$H1N1_segs_fdr < 5, "INDISTINGUISHABLE",
                                       ifelse(newmeta$H1N1_segs_fdr > newmeta$H3N2_segs_fdr, "H1N1", "H3N2")))
   
-  #newmeta$droplet2 <- ifelse(newmeta$droplet=="REASSORTMENT", paste(newmeta$droplet, newmeta$background, sep="_"), newmeta$droplet)
-  newmeta$droplet2 <- paste(newmeta$droplet, newmeta$background, sep="_")
-  
-  
+  #ATTENTION: note that droplet2 was dropped from previous developments!
+              
+		      
   return(newmeta)
   
 }

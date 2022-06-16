@@ -1,7 +1,7 @@
 .libPaths("/pasteur/zeus/projets/p01/uFlu/reassortment_project/resources/R_libs/4.1.0")
 
 ##########################################################################################################
-##### This script has been written by Mary O'Neill in January 2022 for the uFlu project.
+##### This script has been developed by Mary O'Neill in 2021-2022 for the uFlu project.
 ##### It should be executed by a shell script for each sample.
 ##########################################################################################################
 
