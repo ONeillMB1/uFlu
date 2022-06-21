@@ -1,0 +1,27 @@
+Direct Coupling Analysis (DCA) modeling for the uFlu project.
+
+Requirements: numpy, sklearn, matplotlib, scipy.
+
+The scripts to create the figures for the modeling section are given in the
+~figures.org~ notebook.
+
+To train one DCA model:
+
+#+begin_src bash :results output
+export nb_drop=7                # max number of dropout allowed
+export reg=0.0                  # regularization
+export nb_step=300              # nb MC steps
+export nb_opt=3000              # nb updates for the parameters
+input_data=data/merged.txt      # input sample where genotypes and frequencies are given
+output_parm=outputs/dca.parms   # output parameters for the DCA model
+python run_dca.py $input_data --reg $reg -ns $nb_step -nm $nb_opt -d $nb_drop > $output_parm
+#+end_src
+
+To predict the distribution of the 256 possible reassortants (254 + 2 full
+genomes):
+
+#+begin_src bash :results output
+output_parm=outputs/dca.parms
+output_dist=outputs/dca.pop
+python sample.py $output_parm --samp_no_drops --theo  > $output_dist
+#+end_src

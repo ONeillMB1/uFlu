@@ -1,0 +1,412 @@
+* Histogram
+
+#+begin_src python :results output
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib import rcParams
+from matplotlib.patches import Patch
+from random import uniform, shuffle
+from rna_src.utils import read_data, read_sample, read_theo
+
+true_lab = ["PB2", "PB1", "PA", "HA", "NP", "NA", "M", "NS"]
+color_h1 = (123/255, 0, 0, 255/255)
+color_h3 = (0/255, 19/255, 178/255, 255/255)
+
+cmap = ListedColormap([color_h1, color_h3, "white"], N=3)
+
+var_d = {tuple([int(el) for el in l.strip().split()[:8]]): (float(l.strip().split()[-2]), float(l.strip().split()[-1])) for l in open("./outputs/conf_int_7.dat")}
+
+true_pop, true_prob, true_count= read_data("data/merged.txt", nb_drops=0, count=True)
+pred_pop, pred_prob = read_theo("./outputs/pop_7_merged.dat", nb_drops=0)
+pop, prob = pred_pop[::-1], pred_prob[::-1]
+dcount_r = {tuple(s): p for s, p in zip(true_pop, true_count)}
+
+pos_id = list(range(len(pop)))
+pos_id.sort(key=lambda i: pop[i].count(1))
+pop = [pop[i] for i in pos_id]
+prob = np.array([prob[i] for i in pos_id])
+
+true_prob_d = {tuple(conf): p for conf, p in zip(true_pop, true_prob)}
+true_prob = [true_prob_d[tuple(conf)] if tuple(conf) in true_prob_d else 0.0 for conf in pop]
+pred_var_i = [var_d[tuple(p)][0] for p in pop]
+pred_var_s = [var_d[tuple(p)][1] for p in pop]
+
+sep, pid = [], 1
+for i, el in enumerate(pop):
+    if el.count(1) > pid:
+        sep += [i]
+        pid += 1
+
+nb_el = len(prob)
+arr_traj = np.array(pop)
+fig = plt.figure(figsize=(3.5, 5))
+ali_f  = fig.add_subplot(111)
+
+for pi, el in enumerate(prob/max(true_prob)):
+    ali_f.plot([8.1, el*8 + 8.1001], [pi+0.5, pi+0.5], color="grey", linewidth=1.0)
+    ali_f.plot([8.1 + pred_var_i[pi], 8.101 + pred_var_s[pi]], [pi+0.5, pi+0.5], color="red", linewidth=0.5)
+
+for pi, el in enumerate(true_prob/max(true_prob)):
+    if pi > 0:
+        ali_f.plot([el*(-8.)-0.1, -0.1], [pi+0.5, pi+0.5], color="black", linewidth=1.8)
+
+for pi, sp in enumerate(sep):
+    ali_f.plot([0, 8], [sp, sp], color="white", linewidth=0.7, linestyle="--")
+
+fig.gca().spines["top"].set_visible(False)
+fig.gca().spines["right"].set_visible(False)
+fig.gca().spines["left"].set_visible(False)
+ali_f.set_yticks([])
+ali_f.set_xticks([-8.1]+[x+0.5 for x in range(8)]+[16.1])
+ali_f.tick_params(axis='both', length= 2, width=0.5, labelrotation=45, pad=0.2)
+ali_f.set_xticklabels(["{:.0f}".format(max(true_prob)*100)]+true_lab+["{:.0f}".format(max(true_prob)*100)], fontsize=6)
+
+ali_f.pcolormesh(arr_traj, cmap=cmap, vmin=0, vmax=2)
+h1_l = Patch(color=color_h1)
+h3_l = Patch(color=color_h3)
+ali_f.legend((h1_l,h3_l), ("H1N1", "H3N2"), ncol=2, fontsize=10,
+             bbox_to_anchor=(0.32, 1.00), fancybox=False, frameon=False)
+
+# plt.savefig("hist.png", dpi=900, transparent=True)
+plt.show()
+#+end_src
+
+* Integration of the error along the diagonal
+
+#+begin_src python :results output
+from matplotlib import pyplot as plt
+from rna_src.utils import read_data_mat, read_data, read_sample, read_theo
+from scipy.stats import pearsonr
+from numpy import log, mean, array, argmax, log10
+from functools import reduce
+from scipy.stats import ttest_ind
+
+left, width = 0.19, 0.75
+bottom, height = 0.16, 0.79
+rect_scatter = [left, bottom, width, height]
+fig = plt.figure(1, figsize=(2, 2))
+freq_f = fig.add_axes(rect_scatter)
+
+fig.gca().spines["top"].set_visible(False)
+fig.gca().spines["right"].set_visible(False)
+fig.gca().spines["bottom"].set_linewidth(1.5)
+fig.gca().spines["left"].set_linewidth(1.5)
+
+freq_f.tick_params(width=1, labelsize=8)
+freq_f.set_box_aspect(1)
+avg_pred = []
+all_res, all_res_d = {}, {}
+for pii in range(30):
+    nd_res, d_res = [], []
+
+    pred, prob_p = read_theo(f"./outputs/train_val/pop_7_merged_train_{pii}.dat")
+    pred_d, prob_pd = read_theo(f"./outputs/train_val/pop_7_merged_train_drop_{pii}.dat")
+    real, prob_r, count_r = read_data(f"./data/merged.txt", nb_drops=0, count=True)
+
+    dprob_p = {tuple(s): p for s, p in zip(pred, prob_p)}
+    dprob_pd = {tuple(s): p for s, p in zip(pred_d, prob_pd)}
+    dprob_r = {tuple(s): p for s, p in zip(real, prob_r)}
+    dcount_r = {tuple(s): p for s, p in zip(real, count_r)}
+
+    label_seg = ["h1n1", "h3n2"]
+    maxi, max_prob = max(list(enumerate(prob_r)), key=lambda el: el[1])
+    real_l, pred_l, pred_ld, dpred_l, dpred_ld = [], [], [], [], []
+    real_lc = []
+
+    seen = set()
+    for s, pp in dprob_p.items():
+        if s in dprob_r:
+            real_val = -log(dprob_r[s])
+            pred_val = -log(pp)
+            predd_val = -log(dprob_pd[s])
+            real_l += [real_val]
+            pred_l += [pred_val]
+            pred_ld += [predd_val]
+            real_lc += [dprob_r[s]]
+
+    real_l = array(real_l)-mean(real_l)
+    pred_l = array(pred_l)-mean(pred_l)
+    pred_ld = array(pred_ld)-mean(pred_ld)
+
+    real_ci, real_ii, predi_l, predi_ld = [], [], [], []
+    tmp, tmpd = 0., 0.
+    pos_id = list(range(len(real_l)))
+
+    pos_id.sort(key=lambda ii: real_l[ii])
+
+    for ii in pos_id:
+        rval, pval, pdval = real_l[ii], pred_l[ii], pred_ld[ii]
+        rc = real_lc[ii]
+        tmp += abs(rval - pval)
+        tmpd += abs(rval - pdval)
+        predi_l += [tmp]
+        predi_ld += [tmpd]
+        real_ii += [rval]
+        real_ci += [rc]
+        if rc in all_res_d:
+            all_res[rc] += [tmp]
+            all_res_d[rc] += [tmpd]
+        else:
+            all_res[rc] = [tmp]
+            all_res_d[rc] = [tmpd]
+
+    freq_f.scatter(real_ci, predi_ld, color="orange", alpha=0.01, s=1.5)
+    freq_f.scatter(real_ci, predi_l, color="grey", alpha=0.01, s=1.5)
+
+rc_l = [rc for rc in all_res]
+rc_l.sort()
+predi_ld_m = array([mean(all_res_d[rc]) for rc in rc_l])
+predi_l_m = array([mean(all_res[rc]) for rc in rc_l])
+freq_f.plot(rc_l, predi_ld_m, color="orange", linestyle="--", linewidth=1)
+freq_f.plot(rc_l, predi_l_m, color="grey", linestyle="--", linewidth=1)
+freq_f.set_xlim([max(real_ci), 0.0003])
+freq_f.set_xscale("log")
+freq_f.text(10**-1.3, 140, "no-DO", color="grey")
+freq_f.text(10**-1.3, 120, "DO", color="orange")
+min_v = -6
+max_v = 6.5
+testings = [(rc, mean(all_res_d[rc])- mean(all_res[rc]), ttest_ind(all_res_d[rc], all_res[rc])) for rc in rc_l]
+thres_f = [el[0] for el in testings if el[1] < -10 and el[2][1] <= 0.001][::-1][0]
+thres_f_p = [el[0] for el in testings if el[1] < -10 and el[2][1] <= 0.001][::-1][1]
+freq_f.plot([thres_f, thres_f], [0, 150], linestyle="--", linewidth=1, c="orangered")
+# plt.savefig("./img/gain_cumul.png", dpi=300, transparent=True)
+plt.show()
+#+end_src
+
+#+RESULTS:
+
+* Correlations
+** Full model
+Comparison of the prediction model
+
+#+begin_src python :results output
+from matplotlib import pyplot as plt
+from rna_src.utils import read_data_mat, read_data, read_sample, read_theo
+from scipy.stats import pearsonr
+from numpy import log, mean, array
+nd_res, d_res = [], []
+
+pred, prob_p = read_theo(f"./outputs/nd_7/pop_7_merged.dat")
+pred_d, prob_pd = read_theo(f"./outputs/nd_7/pop_7_merged_single.dat")
+real, prob_r, count_r = read_data(f"./data/merged.txt", nb_drops=0, count=True)
+
+dprob_p = {tuple(s): p for s, p in zip(pred, prob_p)}
+dprob_pd = {tuple(s): p for s, p in zip(pred_d, prob_pd)}
+dprob_r = {tuple(s): p for s, p in zip(real, prob_r)}
+dcount_r = {tuple(s): p for s, p in zip(real, count_r)}
+
+label_seg = ["H1N1", "H3N2"]
+maxi, max_prob = max(list(enumerate(prob_r)), key=lambda el: el[1])
+real_l, pred_l, pred_ld = [], [], []
+seen = set()
+
+for s, pp in dprob_p.items():
+    if s in dprob_r:
+        real_l += [-log(dprob_r[s]/dprob_r[tuple(real[maxi])])]
+        pred_l += [-log(pp/dprob_p[tuple(real[maxi])])]
+        pred_ld += [-log(dprob_pd[s]/dprob_pd[tuple(real[maxi])])]
+
+real_l = array(real_l)-1
+pred_l = array(pred_l)
+pred_ld = array(pred_ld)
+
+left, width = 0.19, 0.75
+bottom, height = 0.16, 0.79
+rect_scatter = [left, bottom, width, height]
+fig = plt.figure(1, figsize=(2, 2))
+freq_f = fig.add_axes(rect_scatter)
+
+fig.gca().spines["top"].set_visible(False)
+fig.gca().spines["right"].set_visible(False)
+fig.gca().spines["bottom"].set_linewidth(1.5)
+fig.gca().spines["left"].set_linewidth(1.5)
+freq_f.tick_params(width=1, labelsize=10)
+freq_f.set_box_aspect(1)
+
+freq_f.scatter(real_l, pred_ld, s=5, color="grey", alpha=1)
+
+min_v = -1
+max_v = 6.5
+
+freq_f.plot([min_v, max_v], [min_v, max_v], color="grey", alpha=0.6, linestyle="--", linewidth=1)
+freq_f.set_xlim([min_v, max_v])
+freq_f.set_ylim([min_v, max_v])
+
+cor = pearsonr(pred_l, real_l)[0]
+cor = pearsonr(pred_ld, real_l)[0]
+cor_ = pearsonr(pred_l, real_l)
+cord_ = pearsonr(pred_ld, real_l)
+
+freq_f.text(min_v+0.3, max_v, "$r =$"+ f"{cor:.2f}", color="grey")
+
+# plt.savefig("./img/full_model_no_int.png", dpi=300, transparent=True)
+
+plt.show()
+#+end_src
+
+** Octuplet frequencies
+Test validation bootstrap
+
+#+begin_src python :results output :noweb yes
+from matplotlib import pyplot as plt
+from rna_src.utils import read_data_mat, read_data, read_sample, read_theo
+from sklearn.metrics import r2_score
+from scipy.stats import pearsonr
+from numpy import var, log, percentile, log10
+from numpy import log, mean, array, var
+from scipy.stats import ttest_ind
+
+pval_d, pval_nd = [], []
+nd_res, d_res = [], []
+for pii in range(30):
+    pred, prob_p = read_theo(f"./outputs/train_bench/pop_0_merged_train_{pii}.dat")
+    pred_d, prob_pd = read_theo(f"./outputs/train_bench/pop_7_merged_train_drop_{pii}.dat")
+    real, prob_r = read_data(f"./data/train_bench/merged_val_{pii}.txt")
+    dprob_p = {tuple(s): p for s, p in zip(pred, prob_p)}
+    dprob_pd = {tuple(s): p for s, p in zip(pred_d, prob_pd)}
+    dprob_r = {tuple(s): p for s, p in zip(real, prob_r)}
+
+    maxi, max_prob = max(list(enumerate(prob_r)), key=lambda el: el[1])
+    real_l, pred_l, pred_ld = [], [], []
+    for s, pp in dprob_p.items():
+        if s in dprob_r:
+            real_l += [-log(dprob_r[s]/dprob_r[tuple(real[maxi])])]
+            pred_l += [-log(pp/dprob_p[tuple(real[maxi])])]
+            pred_ld += [-log(dprob_pd[s]/dprob_pd[tuple(real[maxi])])]
+    real_l = array(real_l) - mean(real_l)
+    pred_l = array(pred_l) - mean(pred_l)
+    pred_ld = array(pred_ld) - mean(pred_ld)
+
+    nd_res += [pearsonr(pred_l, real_l)[0]]
+    d_res += [pearsonr(pred_ld, real_l)[0]]
+    pval_nd += [pearsonr(pred_l, real_l)[1]]
+    pval_d += [pearsonr(pred_ld, real_l)[1]]
+    
+left, width = 0.23, 0.75
+bottom, height = 0.12, 0.80
+rect_scatter = [left, bottom, width, height]
+fig = plt.figure(1, figsize=(2, 2))
+ali_f = fig.add_axes(rect_scatter)
+
+for el in fig.gca().spines.keys():
+    if el not in  ["left", "bottom"]:
+        fig.gca().spines[el].set_visible(False)
+fig.gca().spines["bottom"].set_linewidth(1.5)
+fig.gca().spines["left"].set_linewidth(1.5)
+ali_f.boxplot([nd_res, d_res], labels=["no-DO", "DO"], widths=[0.4, 0.4], showmeans=True, meanprops={"marker": ".", "color": "blue"})
+nd_p_inf, nd_p_sup = percentile(nd_res, [25, 75])
+d_p_inf, d_p_sup = percentile(d_res, [25, 75])
+plt.show()
+#+end_src
+
+** Full model frequencies correlation
+
+#+begin_src python :results output
+from matplotlib import pyplot as plt
+from rna_src.utils import read_data_mat, read_data, read_sample, read_theo
+from scipy.stats import pearsonr
+from numpy import log, mean, array, linspace
+
+pred_stats = read_data_mat("./outputs/no_h.stat")
+true_stats = read_data_mat("./outputs/data_7.stat")
+pred_l, true_l = [], []
+for el in pred_stats:
+    for el_ in pred_stats[el]:
+        if len(el) == 2 and el[0] != el[1]:
+            pred_l += [pred_stats[el][el_]]
+            true_l += [true_stats[el][el_]]
+
+left, width = 0.19, 0.75
+bottom, height = 0.16, 0.79
+rect_scatter = [left, bottom, width, height]
+fig = plt.figure(1, figsize=(2, 2))
+freq_f = fig.add_axes(rect_scatter)
+xs = linspace(0, max(pred_l+true_l), 100)
+fig.gca().spines["top"].set_visible(False)
+fig.gca().spines["right"].set_visible(False)
+fig.gca().spines["bottom"].set_linewidth(1.5)
+fig.gca().spines["left"].set_linewidth(1.5)
+freq_f.tick_params(width=1, labelsize=10)
+freq_f.set_box_aspect(1)
+freq_f.scatter(true_l, pred_l, s=5, color="grey", alpha=0.5)
+freq_f.plot(xs, xs, color="grey", alpha=0.5, linestyle="--")
+
+cor = pearsonr(true_l, pred_l)[0]
+freq_f.text(0.0, max(pred_l + true_l), "$r =$"+ f"{cor:.3f}", color="grey")
+
+# plt.savefig("./img/freq_cor.png", dpi=300, transparent=True)
+
+plt.show()
+#+end_src
+
+#+RESULTS:
+
+* Training size
+
+#+begin_src python :results output :noweb yes
+from matplotlib import pyplot as plt
+from rna_src.utils import read_data_mat, read_data, read_sample, read_theo
+from sklearn.metrics import r2_score
+from scipy.stats import pearsonr
+from numpy import var, log, percentile
+from numpy import log, mean, array, var, argmax
+from scipy.stats import ttest_ind
+
+nb_el, nd_res, d_res = [], [], []
+nd_res_d = {}
+nd_res_c = {}
+nb_phe = []
+real, prob_r, real_c = read_data(f"./data/train_size/merged_val.txt", count=True)
+for pii in range(50):
+    pred, prob_p = read_theo(f"./outputs/train_size/pop_7_merged_train_drop_{pii}.dat")
+    train_v, train_p, train_c = read_data(f"./data/train_size/merged_train_drop_{pii}.txt", nb_drops=7, count=True)
+    dprob_p = {tuple(s): p for s, p in zip(pred, prob_p)}
+    dprob_r = {tuple(s): p for s, p in zip(real, prob_r)}
+
+    maxi, max_prob = max(list(enumerate(prob_r)), key=lambda el: el[1])
+    real_l, pred_l = [], []
+    for s, pp in dprob_p.items():
+        if s in dprob_r:
+            real_l += [-log(dprob_r[s]/dprob_r[tuple(real[maxi])])]
+            pred_l += [-log(pp/dprob_p[tuple(real[maxi])])]
+
+    real_l = array(real_l) - mean(real_l)
+    pred_l = array(pred_l) - mean(pred_l)
+
+    if sum(train_c) in nd_res_d:
+        nd_res_d[sum(train_c)] += [pearsonr(pred_l, real_l)[0]]
+    else:
+        nd_res_d[sum(train_c)] = [pearsonr(pred_l, real_l)[0]]
+
+nb_el = [el for el in nd_res_d]
+nb_el.sort()
+nb_gen = [nd_res_d[el] for el in nd_res_d]
+nd_res = [mean(nd_res_d[n]) for n in nb_el]
+
+left, width = 0.25, 0.75
+bottom, height = 0.12, 0.80
+rect_scatter = [left, bottom, width, height]
+fig = plt.figure(1, figsize=(2, 2))
+ali_f = fig.add_axes(rect_scatter)
+
+for el in fig.gca().spines.keys():
+    if el not in  ["left", "bottom"]:
+        fig.gca().spines[el].set_visible(False)
+
+fig.gca().spines["bottom"].set_linewidth(1.5)
+fig.gca().spines["left"].set_linewidth(1.5)
+ali_f.tick_params(width=1, labelsize=10)
+
+for i in range(1):
+    ali_f.scatter(nb_el, [el[i] for el in nb_gen], c="grey", alpha=0.4, s=3)
+
+ali_f.set_xlabel("Training size")
+ali_f.set_ylabel("$r$")
+ali_f.set_ylim([0, 1])
+# plt.savefig("./img/training_size.png", dpi=300, transparent=True)
+
+plt.show()
+#+end_src
+
+#+RESULTS:
